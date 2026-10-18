@@ -1,76 +1,126 @@
 "use client";
 
-import { useState } from "react";
-import { A } from "@/lib/assets";
-import { profile } from "@/lib/data";
+import { useRef } from "react";
+import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import AppWindow from "./AppWindow";
+import DitherCanvas, { type DitherLayer } from "@/components/ui/DitherCanvas";
+import { Button } from "@/components/ui/Button";
+import { EASE } from "@/components/motion/Reveal";
+
+const HEADLINE = "Your team, in Rhythm";
+
+// White dither over the gradient: denser towards the top-right and bottom edges
+const HERO_DITHER: DitherLayer[] = [
+  {
+    color: "#ffffff",
+    alpha: 0.28,
+    intensity: (u, v) => {
+      const corner = Math.max(0, 1 - Math.hypot(u - 1, v) / 1.05);
+      const bottom = Math.max(0, (v - 0.55) / 0.45) * 0.6;
+      return 0.18 + corner * 0.7 + bottom;
+    },
+  },
+];
+
+const BADGES = [
+  { src: "/img/badges/badge-1.png", alt: "Figma partner badge", x: 0, y: 0, w: 94, h: 102 },
+  { src: "/img/badges/badge-iso.png", alt: "ISO 27001 certified", x: 113, y: 1, w: 100, h: 100 },
+  { src: "/img/badges/badge-2.png", alt: "Framer partner badge", x: 232, y: 0, w: 94, h: 102 },
+];
+
+function Badges() {
+  // Badges stay still; they tilt slightly on hover.
+  return (
+    <div className="relative h-[102px] w-[326px] [perspective:600px]">
+      {BADGES.map((b) => (
+        <div
+          key={b.src}
+          className="absolute"
+          style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
+        >
+          <motion.div className="size-full" whileHover={{ rotateX: 8, rotateY: -8, scale: 1.05 }} transition={{ type: "spring", stiffness: 260, damping: 18 }}>
+            <Image src={b.src} alt={b.alt} width={b.w * 2} height={b.h * 2} className="size-full" />
+          </motion.div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Hero() {
-  const [open, setOpen] = useState(false);
-  const shown = open ? profile.bio : profile.bio.slice(0, 1);
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const winY = useTransform(scrollYProgress, [0, 1], [0, -40]);
 
   return (
-    <header className="flex w-full flex-col items-center justify-center gap-[20px] pb-[24px] md:gap-[32px] lg:gap-[40px] lg:pb-[32px]">
-      <div className="flex w-full flex-col">
-        {/* Cover */}
-        <div className="-mb-[50px] h-[150px] w-full overflow-hidden bg-neutral-200 md:-mb-[76px] md:h-[220px] lg:-mb-[104px] lg:h-[290px]">
-          <video
-            src="/assets/cover.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden
-            className="h-full w-full object-cover"
-          />
-        </div>
+    <section id="top" ref={ref} className="relative flex flex-col overflow-hidden bg-white lg:block lg:h-[840px]">
+      {/* Right panel: gradient + dither + app window */}
+      <div className="relative order-2 h-[620px] overflow-hidden bg-navy lg:order-none lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:left-[max(44.65%,calc(50%-77px))]">
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(60% 55% at 50% 50%, rgba(255,255,255,0.18), rgba(255,255,255,0) 100%), linear-gradient(150.6deg, #0369a1 7.4%, #70afd6 40.7%, #36e69a 81.5%)",
+          }}
+        />
+        <DitherCanvas layers={HERO_DITHER} cell={4} pixel={1.5} cursorGlow glowRadius={240} />
+        <motion.div style={{ y: winY }} className="absolute left-5 top-[120px] origin-top-left scale-[0.62] sm:scale-75 lg:left-16 lg:top-[182px] lg:scale-100">
+          <AppWindow />
+        </motion.div>
+      </div>
 
-        <div className="flex w-full flex-col items-start gap-[12px] px-[16px] md:flex-row md:items-end md:gap-[24px] md:px-[48px] lg:h-[214px] lg:gap-[32px] lg:pl-[80px] lg:pr-[120px]">
-          <img
-            src={A.avatar}
-            alt={profile.name}
-            className="size-[90px] shrink-0 rounded-[8px] border-4 border-white object-cover md:size-[130px] lg:size-[167px] lg:border-5"
-          />
-
-          <div className="flex w-full flex-col gap-[4px] pb-[4px]">
-            <div className="flex flex-wrap items-center gap-[10px] py-[4px] lg:gap-[16px] lg:p-[8px]">
-              <h1 className="text-[20px] font-semibold text-neutral-800 md:text-[26px] lg:text-[32px]">
-                {profile.name}
-              </h1>
-              <span className="flex items-center gap-[6px] lg:gap-[8px]">
-                <img src={A.badgeVerified} alt="" aria-hidden className="size-[24px] md:size-[30px] lg:size-[40px]" />
-                <img src={A.badgeX} alt="" aria-hidden className="size-[20px] md:size-[24px] lg:size-[32px]" />
+      {/* Left copy */}
+      <div className="relative mx-auto max-w-[1440px] px-[clamp(20px,5.7vw,82px)] pb-16 pt-32 lg:h-full lg:pb-0 lg:pt-0">
+        <div className="flex max-w-[512px] flex-col gap-6 lg:absolute lg:top-[265px]">
+          <h1 className="font-display text-[clamp(36px,4.4vw,48px)] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
+            {HEADLINE.split(" ").map((w, i) => (
+              <span key={i} className="inline-block overflow-hidden pb-1 align-bottom">
+                <motion.span
+                  className="inline-block"
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.6, ease: EASE, delay: 0.1 + i * 0.04 }}
+                >
+                  {w}
+                  {i < HEADLINE.split(" ").length - 1 ? " " : ""}
+                </motion.span>
               </span>
-            </div>
-            <div className="flex items-center lg:px-[8px]">
-              <p className="text-[15px] text-neutral-600 md:text-[19px] lg:text-[24px]">
-                {profile.role}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bio */}
-      <div className="flex w-full max-w-[913px] flex-col gap-[12px] px-[16px] md:px-[48px] lg:gap-[16px] lg:px-0">
-        {shown.map((para, i) => (
-          <p
-            key={i}
-            className="text-[15px] leading-[24px] text-neutral-800 md:text-[18px] md:leading-[28px] lg:text-[24px] lg:leading-[36px]"
+            ))}
+          </h1>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: EASE, delay: 0.45 }}
+            className="font-display text-[clamp(18px,1.9vw,24px)] leading-[1.5] tracking-[-0.02em] text-body"
           >
-            {para}
-            {i === shown.length - 1 && (
-              <button
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-                aria-expanded={open}
-                className="ml-[8px] cursor-pointer font-medium text-neutral-600 underline underline-offset-4 transition-colors hover:text-neutral-800"
-              >
-                {open ? "Read less" : "Read more"}
-              </button>
-            )}
-          </p>
-        ))}
+            Your meetings, chats, and documents hold the answers. Ritme brings them together into clear priorities and a focused plan for the
+            week ahead.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: EASE, delay: 0.6 }}
+            className="flex flex-wrap gap-2"
+          >
+            <Button variant="primary" href="#signup" arrow>
+              Get Started Free
+            </Button>
+            <Button variant="light" href="#how-it-works">
+              See how it works
+            </Button>
+          </motion.div>
+        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="mt-14 lg:absolute lg:top-[681px] lg:mt-0"
+        >
+          <Badges />
+        </motion.div>
       </div>
-    </header>
+    </section>
   );
 }
