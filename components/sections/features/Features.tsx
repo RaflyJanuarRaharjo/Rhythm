@@ -10,9 +10,9 @@ const CARDS = [
   { label: "AI Meeting Capture", title: "Never lose the thread.", desc: "Turn conversations into searchable summaries, key decisions, and assigned action items without the manual follow-up.", Art: MeetingCapture },
   { label: "Smart Priorities", title: "Focus on what moves you forward.", desc: "Let AI organize tasks around urgency, impact, and deadlines so your team knows where to start.", Art: SmartPriorities },
   { label: "Weekly Focus Plan", title: "Make time for meaningful work.", desc: "Transform your priorities into a realistic weekly schedule that balances meetings, deadlines, and uninterrupted focus.", Art: WeeklyFocus },
-  { label: "04 - Pulse Updates", title: "Stay informed, without the interruptions.", desc: "Get concise updates on progress, blockers, and completed work without another status meeting.", Art: PulseUpdates },
-  { label: "05 - Team Workload", title: "Better balance. Better outcomes.", desc: "See how work is distributed across your team and identify bottlenecks before they slow everyone down.", Art: TeamWorkload },
-  { label: "06 - Connected Context", title: "Every task has a story.", desc: "Trace tasks back to the conversations, decisions, and documents behind them, all in one connected workspace.", Art: ConnectedContext },
+  { label: "Pulse Updates", title: "Stay informed, without the interruptions.", desc: "Get concise updates on progress, blockers, and completed work without another status meeting.", Art: PulseUpdates },
+  { label: "Team Workload", title: "Better balance. Better outcomes.", desc: "See how work is distributed across your team and identify bottlenecks before they slow everyone down.", Art: TeamWorkload },
+  { label: "Connected Context", title: "Every task has a story.", desc: "Trace tasks back to the conversations, decisions, and documents behind them, all in one connected workspace.", Art: ConnectedContext },
 ];
 
 function FeatureCard({ c, index }: { c: (typeof CARDS)[number]; index: number }) {
